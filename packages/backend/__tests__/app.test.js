@@ -61,4 +61,47 @@ describe('API Endpoints', () => {
       expect(response.body.error).toBe('Item name is required');
     });
   });
+
+  describe('DELETE /api/items/:id', () => {
+    it('should delete an existing item', async () => {
+      // First, create an item to delete
+      const createResponse = await request(app)
+        .post('/api/items')
+        .send({ name: 'Item to Delete' })
+        .set('Accept', 'application/json');
+      
+      const itemId = createResponse.body.id;
+      
+      // Then delete it
+      const deleteResponse = await request(app)
+        .delete(`/api/items/${itemId}`);
+      
+      expect(deleteResponse.status).toBe(200);
+      expect(deleteResponse.body).toHaveProperty('success', true);
+      expect(deleteResponse.body.message).toContain(`Item ${itemId} deleted successfully`);
+      
+      // Verify it was actually deleted
+      const getResponse = await request(app).get('/api/items');
+      const deletedItem = getResponse.body.find(item => item.id === itemId);
+      expect(deletedItem).toBeUndefined();
+    });
+
+    it('should return 404 if item does not exist', async () => {
+      // Use a non-existent ID
+      const nonExistentId = 9999;
+      const response = await request(app)
+        .delete(`/api/items/${nonExistentId}`);
+      
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error', 'Item not found');
+    });
+
+    it('should return 400 if ID is invalid', async () => {
+      const response = await request(app)
+        .delete('/api/items/invalid-id');
+      
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Valid item ID is required');
+    });
+  });
 });

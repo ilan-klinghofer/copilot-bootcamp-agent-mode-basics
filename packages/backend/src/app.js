@@ -63,4 +63,30 @@ app.post('/api/items', (req, res) => {
   }
 });
 
+app.delete('/api/items/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate id
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ error: 'Valid item ID is required' });
+    }
+    
+    // Check if item exists
+    const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    
+    // Delete the item
+    const deleteStmt = db.prepare('DELETE FROM items WHERE id = ?');
+    deleteStmt.run(id);
+    
+    res.status(200).json({ success: true, message: `Item ${id} deleted successfully` });
+  } catch (error) {
+    console.error('Error deleting item:', error);
+    res.status(500).json({ error: 'Failed to delete item' });
+  }
+});
+
 module.exports = { app, db, insertStmt };

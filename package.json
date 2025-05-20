@@ -12,7 +12,10 @@
     "start:backend": "npm run start --workspace=backend",
     "install:all": "npm install && npm run install:frontend && npm run install:backend",
     "install:frontend": "cd packages/frontend && npm install",
-    "install:backend": "cd packages/backend && npm install"
+    "install:backend": "cd packages/backend && npm install",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:frontend": "cd packages/frontend && CI=true npm test",
+    "test:backend": "cd packages/backend && npm test"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
